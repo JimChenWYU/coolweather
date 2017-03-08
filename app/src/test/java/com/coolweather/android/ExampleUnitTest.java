@@ -1,5 +1,7 @@
 package com.coolweather.android;
 
+import com.coolweather.android.db.City;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
