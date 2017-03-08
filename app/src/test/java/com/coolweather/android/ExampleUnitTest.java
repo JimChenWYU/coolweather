@@ -1,6 +1,6 @@
 package com.coolweather.android;
 
-import com.coolweather.android.db.City;
+import com.coolweather.android.util.Utils;
 
 import org.junit.Test;
 
