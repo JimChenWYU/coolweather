@@ -1,13 +1,19 @@
 package com.coolweather.android;
 
+import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,6 +31,7 @@ import com.coolweather.android.util.Utility;
 import com.coolweather.android.util.Utils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,9 +40,13 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends BaseActivity {
 
     private static final String TAG = "WeatherActivity";
+
+    private String mWeatherId;
+
+    private ProgressDialog progressDialog;
 
     @BindView(R.id.title_city)
     TextView titleCity;
@@ -61,8 +72,12 @@ public class WeatherActivity extends AppCompatActivity {
     ScrollView weatherLayout;
     @BindView(R.id.bing_pc_img)
     ImageView bingPcImg;
-    @BindView(R.id.back_button)
-    Button backButton;
+    @BindView(R.id.swipe_refresh)
+    SwipeRefreshLayout swipeRefresh;
+    @BindView(R.id.nav_button)
+    Button navButton;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,37 +89,43 @@ public class WeatherActivity extends AppCompatActivity {
          * 加载背景图
          */
         loadBackgroundImage();
+
         /**
          * 状态栏融合背景图
          */
         hideStatusBar();
 
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = preferences.getString("weather", null);
 
         if (weatherString != null) {
             Weather weather = Utility.handleWeatherResponse(weatherString);
+            mWeatherId = weather.getBasic().getId();
             showWeatherInfo(weather);
         } else {
-            String weatherId = getIntent().getStringExtra("weather_id");
+            mWeatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
+            requestWeather(mWeatherId);
         }
+
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId);
+            }
+        });
+        weatherLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return drawerLayout.isDrawerOpen(Gravity.LEFT);
+            }
+        });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        onClick();
-    }
-
-    @OnClick(R.id.back_button)
+    @OnClick(R.id.nav_button)
     void onClick() {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putString("weather", null);
-        if (editor.commit()) {
-            finish();
-        }
+        drawerLayout.openDrawer(GravityCompat.START);
     }
 
     private void hideStatusBar() {
@@ -150,9 +171,9 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void requestWeather(String weatherId) {
+    public void requestWeather(String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=" + Utils.getEnvConfig(this).getValue("key");
-//        LogUtil.d(TAG, weatherUrl);
+        mWeatherId = weatherId;
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -162,6 +183,7 @@ public class WeatherActivity extends AppCompatActivity {
                     public void run() {
 //                        LogUtil.d(TAG, "onFailure");
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
@@ -182,10 +204,12 @@ public class WeatherActivity extends AppCompatActivity {
 //                            LogUtil.d(TAG, "onResponse: " + weather.getStatus());
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
         });
+        loadBingPic();
     }
 
     private void showWeatherInfo(Weather weather) {
