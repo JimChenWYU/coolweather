@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="finestwebview-1.2.7">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/d34dc7e8afaee083ef332781d451e92a7dce7183/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/d34dc7e8afaee083ef332781d451e92a7dce7183/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.thefinestartist/finestwebview/1.2.7/6bf136d82ad78e9f09a5dee416e73aab46f1834d/finestwebview-1.2.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
