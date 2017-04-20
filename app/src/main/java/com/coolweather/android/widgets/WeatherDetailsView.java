@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,7 +19,6 @@ import com.coolweather.android.utils.WeatherUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Adler32;
 
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -107,4 +105,10 @@ public class WeatherDetailsView extends LinearLayout{
         dailyForecastList.addAll(weather.getDaily_forecast());
         letItGo();
     }
+
+//    public void setWeather(HeWeather5.DataBean weather) {
+//        dailyForecastList.clear();
+//        dailyForecastList.addAll(weather.getDaily_forecast());
+//        letItGo();
+//    }
 }

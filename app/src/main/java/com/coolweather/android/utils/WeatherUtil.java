@@ -1,7 +1,5 @@
 package com.coolweather.android.utils;
 
-import android.support.annotation.IntDef;
-
 import com.coolweather.android.App;
 import com.coolweather.android.AppGlobal;
 import com.coolweather.android.http.RetrofitManager;
@@ -94,5 +92,46 @@ public class WeatherUtil {
                 return true;
             }
         }).subscribeOn(Schedulers.io()).subscribe();
+    }
+
+    public static String getShareMessage(HeWeather5.DataBean weather) {
+        StringBuffer message = new StringBuffer();
+        message.append(weather.getBasic().getCity());
+        message.append("天气：");
+        message.append("\r\n");
+        message.append(weather.getBasic().getUpdate().getLoc());
+        message.append(" 发布：");
+        message.append("\r\n");
+        message.append(weather.getNow().getCond().getTxt());
+        message.append("，");
+        message.append(weather.getNow().getTmp()).append("℃");
+        message.append("。");
+        message.append("\r\n");
+        message.append("PM2.5：").append(weather.getAqi().getCity().getPm25());
+        message.append("，");
+        message.append(weather.getAqi().getCity().getQlty());
+        message.append("。");
+        message.append("\r\n");
+        message.append("今天：");
+        message.append(weather.getDaily_forecast().get(0).getTmp().getMin()).append("℃-");
+        message.append(weather.getDaily_forecast().get(0).getTmp().getMax()).append("℃");
+        message.append("，");
+        message.append(weather.getDaily_forecast().get(0).getCond().getTxt_d());
+        message.append("，");
+        message.append(weather.getDaily_forecast().get(0).getWind().getDir());
+        message.append(weather.getDaily_forecast().get(0).getWind().getSc());
+        message.append("级。");
+        message.append("\r\n");
+        message.append("明天：");
+        message.append(weather.getDaily_forecast().get(1).getTmp().getMin()).append("℃-");
+        message.append(weather.getDaily_forecast().get(1).getTmp().getMax()).append("℃");
+        message.append("，");
+        message.append(weather.getDaily_forecast().get(1).getCond().getTxt_d());
+        message.append("，");
+        message.append(weather.getDaily_forecast().get(1).getWind().getDir());
+        message.append(weather.getDaily_forecast().get(1).getWind().getSc());
+        message.append("级。");
+
+        return message.toString();
     }
 }

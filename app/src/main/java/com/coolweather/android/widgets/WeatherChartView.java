@@ -29,6 +29,7 @@ import rx.android.schedulers.AndroidSchedulers;
 
 public class WeatherChartView extends LinearLayout {
 
+    private static final String TAG = "WeatherChartView";
     private List<HeWeather5.DataBean.DailyForecastBean> dailyForecastList = new ArrayList<>();
 
     LinearLayout.LayoutParams cellParams;
@@ -123,8 +124,12 @@ public class WeatherChartView extends LinearLayout {
                                     .into(ivIcon);
                         }
                     });
-            minTemp.add(Integer.valueOf(dailyForecastList.get(i).getTmp().getMin()));
-            maxTemp.add(Integer.valueOf(dailyForecastList.get(i).getTmp().getMax()));
+            String min = dailyForecastList.get(i).getTmp().getMin();
+            String max = dailyForecastList.get(i).getTmp().getMax();
+            min = (min != null) ? min : "0";
+            max = (max != null) ? max : String.valueOf(Integer.valueOf(min) + 5);
+            minTemp.add(Integer.valueOf(min));
+            maxTemp.add(Integer.valueOf(max));
             weatherStrView.addView(tvWeather, cellParams);
             dateTitleView.addView(tvDate, cellParams);
             iconView.addView(ivIcon, cellParams);

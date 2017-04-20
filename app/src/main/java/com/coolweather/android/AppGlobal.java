@@ -7,4 +7,5 @@ package com.coolweather.android;
 public class AppGlobal {
     public static final String CURRENT_INDEX = "currentIndex";
     public static final String WEATHER_SIGN = "weatherSign.json";
+    public static final String TTS_APPID = "58f86b5c";
 }

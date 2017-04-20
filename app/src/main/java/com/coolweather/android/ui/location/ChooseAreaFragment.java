@@ -6,7 +6,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,8 +23,8 @@ import com.coolweather.android.model.County;
 import com.coolweather.android.model.Province;
 import com.coolweather.android.ui.MainActivity;
 import com.coolweather.android.ui.base.BaseContentFragment;
+import com.coolweather.android.ui.location.adapter.AreaAdapter;
 import com.coolweather.android.ui.weather.WeatherFragment;
-import com.coolweather.android.utils.ACache;
 import com.coolweather.android.utils.Logger;
 
 import org.litepal.crud.DataSupport;
@@ -53,7 +52,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
     private TextView mTitleText;
     private Button mBackButton;
     private ListView mListView;
-    private ArrayAdapter<String> adapter;
+    private AreaAdapter adapter;
 
     private List<String> regionList = new ArrayList<>();
     private List<Province> provinceList = new ArrayList<>();
@@ -63,11 +62,9 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
     private Province selectedProvince;
     private City selectedCity;
 
-    private int currentLevel;
+    private int currentLevel = 0;
 
     private Subscription subscription;
-
-    private ACache mCache;
 
     @Override
     protected int getLayoutId() {
@@ -77,18 +74,29 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
     @Override
     protected void initViews() {
         super.initViews();
-        mCache = ACache.get(getActivity());
         mBackButton = findView(R.id.choose_area_back);
         mTitleText = findView(R.id.choose_area_title);
         mListView = findView(R.id.area_list);
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, regionList);
+        adapter = new AreaAdapter(getContext(), android.R.layout.simple_list_item_1, regionList);
         mListView.setAdapter(adapter);
     }
 
     @Override
     protected void lazyFetchData() {
-        currentLevel = LEVEL_PROVINCE;
-        queryProvinces();
+        switch (currentLevel) {
+            case LEVEL_PROVINCE:
+                queryProvinces();
+                break;
+            case LEVEL_CITY:
+                queryCities();
+                break;
+            case LEVEL_COUNTY:
+                queryCounties();
+                break;
+            default:
+                queryProvinces();
+                break;
+        }
     }
 
     @Override
@@ -153,6 +161,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
             adapter.notifyDataSetChanged();
             mListView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
+            showRefreshing(false);
         } else {
             queryFromServer(LEVEL_PROVINCE);
         }
@@ -171,6 +180,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
             adapter.notifyDataSetChanged();
             mListView.setSelection(0);
             currentLevel = LEVEL_CITY;
+            showRefreshing(false);
         } else {
             queryFromServer(LEVEL_CITY);
         }
@@ -189,6 +199,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
             adapter.notifyDataSetChanged();
             mListView.setSelection(0);
             currentLevel = LEVEL_COUNTY;
+            showRefreshing(false);
         } else {
             queryFromServer(LEVEL_COUNTY);
         }
@@ -223,8 +234,9 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
 
                     @Override
                     public void onError(Throwable e) {
-                        Logger.e("Fetch Region Error", e.getMessage());
+                        showRefreshing(false);
                         fetchError();
+                        Logger.e("Fetch Region Error", e.getMessage());
                     }
 
                     @Override
@@ -260,6 +272,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
 
                     @Override
                     public void onError(Throwable e) {
+                        showRefreshing(false);
                         fetchError();
                         Logger.e("Fetch City Error", e.getMessage());
                     }
@@ -332,6 +345,7 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
 
                     @Override
                     public void onError(Throwable e) {
+                        showRefreshing(false);
                         fetchError();
                         Logger.e("Fetch Weather Error", e.getMessage());
                     }
@@ -342,8 +356,11 @@ public class ChooseAreaFragment extends BaseContentFragment implements AdapterVi
                             fetchError();
                             return;
                         }
-                        mCache.put(WeatherFragment.CACHE_WEATHER_NAME, response.data, 10 * 60);
-                        startActivity(new Intent(getActivity(), MainActivity.class));
+//                        mCache.put(WeatherFragment.CACHE_WEATHER_NAME, response.data, 10 * 60);
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.putExtra(MainActivity.SHOULD_DOUBLE_CLICK_EXIT, false);
+                        intent.putExtra(WeatherFragment.CACHE_WEATHER_NAME, response.data);
+                        startActivity(intent);
                         getActivity().finish();
                     }
 

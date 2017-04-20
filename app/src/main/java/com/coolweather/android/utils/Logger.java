@@ -1,6 +1,5 @@
 package com.coolweather.android.utils;
 
-import android.app.Activity;
 import android.support.annotation.IntDef;
 import android.util.Log;
 
@@ -68,9 +67,9 @@ public class Logger {
         }
     }
 
-    public static void i(String tag, String msg) {
+    public static <T> void i(String tag, T msg) {
         if (level <= INFO) {
-            Log.i(tag, msg);
+            Log.i(tag, String.valueOf(msg));
         }
     }
 

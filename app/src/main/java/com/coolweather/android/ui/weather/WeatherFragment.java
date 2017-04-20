@@ -1,16 +1,17 @@
 package com.coolweather.android.ui.weather;
 
-import android.os.Build;
+import android.Manifest;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,11 +28,16 @@ import com.coolweather.android.location.RxLocation;
 import com.coolweather.android.model.HeWeather5;
 import com.coolweather.android.ui.MainActivity;
 import com.coolweather.android.ui.base.BaseContentFragment;
+import com.coolweather.android.ui.location.ChooseAreaActivity;
 import com.coolweather.android.ui.weather.adapter.WeatherAdapter;
 import com.coolweather.android.utils.ACache;
 import com.coolweather.android.utils.Logger;
+import com.coolweather.android.utils.SettingsUtil;
+import com.coolweather.android.utils.ShareUtils;
+import com.coolweather.android.utils.TTSManager;
 import com.coolweather.android.utils.TimeUtils;
 import com.coolweather.android.utils.WeatherUtil;
+import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +48,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -49,12 +56,13 @@ import rx.schedulers.Schedulers;
  * Created by lenovo on 2017/4/11.
  */
 
-public class WeatherFragment extends BaseContentFragment {
+public class WeatherFragment extends BaseContentFragment implements Toolbar.OnMenuItemClickListener, View.OnClickListener{
 
     public static final String CACHE_WEATHER_NAME = "weather_cache";
     public static final String CACHE_BACKGROUND = "bing_pic_cache";
 
     private Toolbar mToolbar;
+    private FloatingActionButton mFloatingActionButton;
     private TextView tvCityName;
     private TextView tvNowWeatherString;
     private TextView tvNowTemp;
@@ -64,9 +72,8 @@ public class WeatherFragment extends BaseContentFragment {
     private RecyclerView recyclerView;
     private WeatherAdapter adapter;
 
-    private ACache mCache;
-
     private HeWeather5.DataBean currentWeather;
+    private ACache mCache;
 
     private Subscription subscription;
 
@@ -84,12 +91,7 @@ public class WeatherFragment extends BaseContentFragment {
         ((MainActivity)getActivity()).initDrawer(mToolbar);
         mToolbar.inflateMenu(R.menu.menu_weather);
         // TODO: 2017/4/11
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return false;
-            }
-        });
+        mFloatingActionButton = findView(R.id.locate);
 
         tvCityName = findView(R.id.tv_city_name);
         tvNowWeatherString = findView(R.id.tv_weather_string);
@@ -107,9 +109,29 @@ public class WeatherFragment extends BaseContentFragment {
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mToolbar.setOnMenuItemClickListener(this);
+        mFloatingActionButton.setOnClickListener(this);
+    }
+
+    @Override
     protected void lazyFetchData() {
         getBingPic();
-        getWeatherData();
+        if (!locateWeather()) {
+            getWeatherData();
+        }
+    }
+
+    private boolean locateWeather() {
+        Intent intent = getActivity().getIntent();
+        HeWeather5.DataBean weather = (HeWeather5.DataBean) intent.getSerializableExtra(CACHE_WEATHER_NAME);
+        if (weather != null) {
+            showWeather(weather);
+            showRefreshing(false);
+            return true;
+        }
+        return false;
     }
 
     private void showWeather(HeWeather5.DataBean weather) {
@@ -141,6 +163,16 @@ public class WeatherFragment extends BaseContentFragment {
 
     private void shareWeather() {
         // TODO: 2017/4/11
+        if (currentWeather == null) {
+            return;
+        }
+
+        String shareType = SettingsUtil.getWeatherShareType();
+        if (shareType.equals("纯文本")) {
+            ShareUtils.shareText(getActivity(), WeatherUtil.getShareMessage(currentWeather));
+        } else if (shareType.equals("仿锤子便签")){
+            ShareActivity.actionStart(getActivity(), WeatherUtil.getShareMessage(currentWeather));
+        }
     }
 
     private void showBingPic(String url) {
@@ -189,7 +221,7 @@ public class WeatherFragment extends BaseContentFragment {
         showRefreshing(true);
         HeWeather5.DataBean cacheWeather = (HeWeather5.DataBean) mCache.getAsObject(CACHE_WEATHER_NAME);
         if (cacheWeather != null) {
-            Logger.d("cache", cacheWeather.toString());
+            Logger.d("cacheWeather", cacheWeather.toString());
             showWeather(cacheWeather);
             showRefreshing(false);
             return;
@@ -257,6 +289,37 @@ public class WeatherFragment extends BaseContentFragment {
         super.onDestroy();
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                new RxPermissions(getActivity())
+                        .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Action1<Boolean>() {
+                            @Override
+                            public void call(Boolean result) {
+                                if (result) {
+                                    shareWeather();
+                                }
+                            }
+                        });
+                return true;
+            case R.id.menu_tts:
+                TTSManager.getInstance(getActivity()).speak(WeatherUtil.getShareMessage(currentWeather), null);
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.locate:
+                startActivity(new Intent(getActivity(), ChooseAreaActivity.class));
+                break;
         }
     }
 }

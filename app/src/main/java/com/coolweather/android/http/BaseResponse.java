@@ -1,7 +1,5 @@
 package com.coolweather.android.http;
 
-import com.coolweather.android.model.HeWeather5;
-
 /**
  * Created by lenovo on 2017/4/12.
  */

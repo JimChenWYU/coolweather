@@ -26,6 +26,8 @@ public class App extends Application {
         LitePal.initialize(mContext);
         if (!BuildConfig.DEBUG) {
             Logger.setLevel(Logger.NOTHING);
+        } else {
+            Logger.setLevel(Logger.VERBOSE);
         }
     }
 
