@@ -221,13 +221,11 @@ public class WeatherFragment extends BaseContentFragment implements Toolbar.OnMe
         showRefreshing(true);
         HeWeather5.DataBean cacheWeather = (HeWeather5.DataBean) mCache.getAsObject(CACHE_WEATHER_NAME);
         if (cacheWeather != null) {
-            Logger.d("cacheWeather", cacheWeather.toString());
             showWeather(cacheWeather);
             showRefreshing(false);
             return;
         }
 
-        Logger.d("reloadData", ".......................");
         subscription = RxLocation.get().locate(getActivity())
                 .flatMap(new Func1<BDLocation, Observable<BaseWeatherResponse>>() {
                     @Override
@@ -237,7 +235,6 @@ public class WeatherFragment extends BaseContentFragment implements Toolbar.OnMe
                             city = bdLocation.getCity().replace("市", "");
                         }
 
-                        tvCityName.setText(city);
                         return ApiFactory
                                 .getWeatherController()
                                 .getWeather(city)
@@ -263,7 +260,6 @@ public class WeatherFragment extends BaseContentFragment implements Toolbar.OnMe
                             fetchError();
                             return;
                         }
-                        Logger.e("debug", response.toString());
 
                         showWeather(response.data);
                         mCache.put(CACHE_WEATHER_NAME, response.data, 10 * 60);

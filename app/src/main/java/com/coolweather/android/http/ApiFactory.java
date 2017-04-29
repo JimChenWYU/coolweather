@@ -1,5 +1,6 @@
 package com.coolweather.android.http;
 
+import com.coolweather.android.http.api.GirlsController;
 import com.coolweather.android.http.api.RegionController;
 import com.coolweather.android.http.api.WeatherController;
 
@@ -10,9 +11,11 @@ import com.coolweather.android.http.api.WeatherController;
 public class ApiFactory {
     protected static final Object monitor = new Object();
 
-    private static WeatherController weatherController;
+    private volatile static WeatherController weatherController;
 
-    private static RegionController regionController;
+    private volatile static RegionController regionController;
+
+    private volatile static GirlsController girlsController;
 
     public static WeatherController getWeatherController() {
         if (weatherController == null) {
@@ -30,5 +33,14 @@ public class ApiFactory {
             }
         }
         return regionController;
+    }
+
+    public static GirlsController getGirlsController() {
+        if (girlsController == null) {
+            synchronized (monitor) {
+                girlsController = RetrofitManager.getInstance().create(GirlsController.class);
+            }
+        }
+        return girlsController;
     }
 }

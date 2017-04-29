@@ -18,4 +18,6 @@ public class ApiGlobal {
     public static final String HE_SCENIC_WEATHER_URL = "http://coolweather.chenjunwu.com/v1/china/scenic/";
 
     public static final String HE_SCENIC_DETAIL_WEATHER_URL = "http://coolweather.chenjunwu.com/v1/weather/scenic/";
+
+    public static final String GANK_GIRLS = "http://coolweather.chenjunwu.com/v1/meizi/gank/";
 }

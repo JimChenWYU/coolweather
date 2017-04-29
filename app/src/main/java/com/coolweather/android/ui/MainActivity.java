@@ -20,6 +20,7 @@ import com.coolweather.android.R;
 import com.coolweather.android.even.ThemeChangedEvent;
 import com.coolweather.android.ui.base.BaseActivity;
 import com.coolweather.android.ui.scenic.ScenicFragment;
+import com.coolweather.android.ui.settings.AboutActivity;
 import com.coolweather.android.ui.settings.SettingsActivity;
 import com.coolweather.android.ui.weather.WeatherFragment;
 import com.coolweather.android.utils.DoubleClickExit;
@@ -222,6 +223,8 @@ public class MainActivity extends BaseActivity {
                                 case R.id.navigation_item_settings:
                                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                                     break;
+                                case R.id.navigation_item_about:
+                                    startActivity(new Intent(MainActivity.this, AboutActivity.class));
                             }
                         }
                     });

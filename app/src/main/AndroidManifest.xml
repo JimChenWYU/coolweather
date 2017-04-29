@@ -36,7 +36,7 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:screenOrientation="portrait"
-            android:value="VjCbFhmE3ddWV524rL7r3Tpr2zqGkxVo" />
+            android:value="y28sCqzliewwGSFC9RSoB7rEx4RctGZK" />
 
         <activity android:name=".ui.MainActivity">
             <intent-filter>
@@ -64,7 +64,11 @@
             android:process=":remove" />
 
         <activity android:name=".ui.weather.ShareActivity" />
-        <activity android:name=".ui.settings.SettingsActivity"></activity>
+        <activity android:name=".ui.settings.SettingsActivity" />
+        <activity
+            android:name=".ui.settings.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

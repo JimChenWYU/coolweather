@@ -5,6 +5,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ public abstract class BaseFragment extends Fragment {
     private boolean hasFetchData; // 标识已经触发过懒加载数据
 
     protected View mRootView;
+    protected AppCompatActivity mActivity;
 
     @LayoutRes
     protected abstract int getLayoutId();

@@ -1,7 +1,6 @@
 <resources>
 
-    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
-    </style>
+    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar"></style>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="BaseTheme">
@@ -94,4 +93,8 @@
     <style name="TabLayoutTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
